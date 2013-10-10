@@ -19,6 +19,15 @@ use ReflectionObject;
  */
 abstract class Multiton
 {
+
+    protected static function getImplementationClassName(){
+
+        $cn = get_called_class();
+
+        return $cn;
+
+    }
+
     /**
      * Returns an array of all members in this multiton.
      *
@@ -26,10 +35,12 @@ abstract class Multiton
      */
     final public static function members()
     {
-        $class = get_called_class();
+        $class = self::getImplementationClassName();
+
         if (!array_key_exists($class, self::$members)) {
             self::$members[$class] = array();
-            static::initializeMembers();
+
+            call_user_func(array($class,'initializeMembers'));
         }
 
         return self::$members[$class];
@@ -96,7 +107,7 @@ abstract class Multiton
         );
         if (null === $member) {
             throw static::createUndefinedMemberException(
-                get_called_class(),
+                self::getImplementationClassName(),
                 $property,
                 $value
             );
@@ -159,7 +170,7 @@ abstract class Multiton
         $member = static::memberByPredicateWithDefault($predicate);
         if (null === $member) {
             throw static::createUndefinedMemberException(
-                get_called_class(),
+                self::getImplementationClassName(),
                 '<callback>',
                 '<callback>'
             );
@@ -327,7 +338,7 @@ abstract class Multiton
             );
         }
 
-        self::$members[get_called_class()][$member->key()] = $member;
+        self::$members[self::getImplementationClassName()][$member->key()] = $member;
     }
 
     /**
